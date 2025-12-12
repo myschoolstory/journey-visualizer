@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugarcane Journey | Americas Biomass Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+        }
+
+        .step-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .active-step {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Comparison Slider Styles */
+        .comparison-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+
+        .comparison-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .comparison-after {
+            width: 50%;
+            z-index: 10;
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: white;
+            cursor: ew-resize;
+            z-index: 20;
+            transform: translateX(-50%);
+        }
+
+        .slider-handle::after {
+            content: '↔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: #166534;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .slider-handle:hover::after {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: #15803d;
+        }
+
+        .label-modern, .label-traditional {
+            position: absolute;
+            bottom: 20px;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border-radius: 4px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 25;
+        }
+        .label-traditional { left: 20px; }
+        .label-modern { right: 20px; }
+
+        .data-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="gradient-bg text-white py-16 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4">The Sugarcane Journey</h1>
+            <p class="text-xl opacity-90 max-w-2xl mx-auto">Visualizing Brazil's biomass revolution: From sun-drenched fields to sustainable bioethanol production.</p>
+            <div class="mt-8 flex justify-center gap-4">
+                <a href="#journey" class="bg-white text-green-800 px-6 py-3 rounded-full font-bold hover:bg-green-50 transition">Start Journey</a>
+                <a href="#compare" class="border border-white text-white px-6 py-3 rounded-full font-bold hover:bg-white/10 transition">Compare Efficiency</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Journey Section -->
+    <section id="journey" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">The Production Lifecycle</h2>
+            <p class="text-slate-600">Click each stage to explore energy balance and emissions metrics.</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="relative mb-12">
+            <!-- Connector Line (Desktop) -->
+            <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -z-10 -translate-y-1/2"></div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <button onclick="showStep(1)" id="btn-1" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center active-step relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">Cultivation</span>
+                </button>
+                <button onclick="showStep(2)" id="btn-2" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-tractor"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">Harvesting</span>
+                </button>
+                <button onclick="showStep(3)" id="btn-3" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">Extraction</span>
+                </button>
+                <button onclick="showStep(4)" id="btn-4" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">Fermentation</span>
+                </button>
+                <button onclick="showStep(5)" id="btn-5" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-fire-alt"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">Distillation</span>
+                </button>
+                <button onclick="showStep(6)" id="btn-6" class="step-card bg-white p-4 rounded-xl border-2 border-slate-100 flex flex-col items-center text-center relative">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3 z-10 relative">
+                        <i class="fas fa-gas-pump"></i>
+                    </div>
+                    <span class="font-bold text-xs md:text-sm">End Use</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Detail Panel -->
+        <div id="detail-panel" class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div class="absolute top-4 right-4 z-20 hidden md:block">
+                    <div class="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg text-xs font-bold shadow-sm border border-slate-100">
+                        <i class="fas fa-location-dot text-red-500 mr-1"></i> São Paulo Region, Brazil
+                    </div>
+                </div>
+                <div class="relative h-64 lg:h-auto overflow-hidden">
+                    <img id="step-image" src="https://images.unsplash.com/photo-1596733430284-f7437764b1a9?auto=format&fit=crop&q=80&w=1200" alt="Sugarcane field" class="absolute inset-0 w-full h-full object-cover transition-all duration-700">
+                    <div class="absolute inset-0 bg-black/20"></div>
+                </div>
+                <div class="p-8 lg:p-12">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span id="step-number" class="text-green-600 font-bold text-lg tracking-widest uppercase">Stage 01</span>
+                        <div class="h-px flex-1 bg-slate-100"></div>
+                    </div>
+                    <h3 id="step-title" class="text-3xl font-bold mb-6">Planting & Growing</h3>
+                    <p id="step-desc" class="text-slate-600 text-lg mb-8 leading-relaxed">
+                        Sugarcane is planted in vast Brazilian fields. During its 12-18 month growth cycle, it absorbs massive amounts of CO2 from the atmosphere through photosynthesis, making the entire lifecycle nearly carbon neutral.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 group relative">
+                            <h4 class="text-blue-900 font-bold text-sm uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-bolt"></i> Energy Balance
+                            </h4>
+                            <p id="step-energy" class="text-2xl font-black text-blue-700">1 : 9.2</p>
+                            <p class="text-xs text-blue-600 mt-1">Output vs Input ratio</p>
+                            <!-- Tooltip -->
+                            <div class="absolute bottom-full left-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Ratio of energy contained in the final fuel compared to the fossil energy used to produce it.
+                            </div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-2xl border border-red-100 group relative">
+                            <h4 class="text-red-900 font-bold text-sm uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-cloud"></i> Net Emissions
+                            </h4>
+                            <p id="step-emissions" class="text-2xl font-black text-red-700">-2.4t</p>
+                            <p class="text-xs text-red-600 mt-1">CO2 eq per hectare/yr</p>
+                            <!-- Tooltip -->
+                            <div class="absolute bottom-full left-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Negative values indicate carbon sequestration (absorption from atmosphere).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Biogenic Carbon Cycle Section -->
+    <section class="py-20 bg-green-900 text-white overflow-hidden">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold mb-6">The Closed-Loop Advantage</h2>
+                    <p class="text-green-100 text-lg mb-8 leading-relaxed">
+                        Unlike fossil fuels, which release carbon trapped underground for millions of years, sugarcane ethanol is part of a **short-cycle biogenic loop**.
+                    </p>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Growth Phase</h4>
+                                <p class="text-sm text-green-200">Plants absorb CO2 during photosynthesis to build biomass.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                                <i class="fas fa-sync"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Combustion Phase</h4>
+                                <p class="text-sm text-green-200">When burned, only the CO2 previously absorbed is returned to the atmosphere.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
+                                <i class="fas fa-shield-virus"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Fossil Offset</h4>
+                                <p class="text-sm text-green-200">Every liter of ethanol replaces high-carbon fossil gasoline.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 relative">
+                    <!-- Simple CSS/SVG Diagram of the cycle -->
+                    <div class="relative w-full aspect-square flex items-center justify-center">
+                        <div class="absolute inset-0 border-4 border-dashed border-green-500/30 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                        <div class="bg-white/10 backdrop-blur-md p-8 rounded-full border border-white/20 text-center z-10">
+                            <div class="text-4xl font-bold text-green-400">90%</div>
+                            <div class="text-xs uppercase tracking-widest text-white/70">Less GHG Emissions</div>
+                            <div class="text-[10px] text-white/50 mt-1">Vs. Gasoline</div>
+                        </div>
+                        <!-- Floating Icons -->
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-sun text-xl"></i>
+                        </div>
+                        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-tint text-xl"></i>
+                        </div>
+                        <div class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-leaf text-xl"></i>
+                        </div>
+                        <div class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 bg-red-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                            <i class="fas fa-car text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Slider Section -->
+    <section id="compare" class="py-20 bg-slate-100 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">The Evolution: Traditional vs. Modern</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">Slide to see how Brazil transformed primitive biomass burning into a high-efficiency industrial powerhouse.</p>
+            </div>
+
+            <div class="comparison-container shadow-2xl" id="slider-root">
+                <!-- Background (Traditional) -->
+                <div class="comparison-img" style="background-image: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200');">
+                    <div class="absolute inset-0 bg-black/40"></div>
+                    <div class="label-traditional uppercase tracking-tighter">Traditional Open Burning</div>
+                    
+                    <div class="absolute top-1/4 left-10 text-white max-w-xs">
+                        <h4 class="text-xl font-bold mb-2">Low Efficiency</h4>
+                        <ul class="space-y-2 text-sm opacity-90">
+                            <li><i class="fas fa-times-circle text-red-400 mr-2"></i> Only 5-10% energy recovery</li>
+                            <li><i class="fas fa-times-circle text-red-400 mr-2"></i> High particulate matter (PM2.5)</li>
+                            <li><i class="fas fa-times-circle text-red-400 mr-2"></i> Soil nutrient depletion</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Foreground (Modern) -->
+                <div class="comparison-img comparison-after" id="after-img" style="background-image: url('https://images.unsplash.com/photo-1518398046578-8cca57782e17?auto=format&fit=crop&q=80&w=1200');">
+                    <div class="absolute inset-0 bg-green-900/40"></div>
+                    <div class="label-modern uppercase tracking-tighter">Modern Bio-Refinery</div>
+
+                    <div class="absolute top-1/4 right-10 text-white max-w-xs text-right">
+                        <h4 class="text-xl font-bold mb-2">High Precision</h4>
+                        <ul class="space-y-2 text-sm opacity-90">
+                            <li class="flex items-center justify-end"><span class="mr-2">90%+ GHG reduction</span> <i class="fas fa-check-circle text-green-400"></i></li>
+                            <li class="flex items-center justify-end"><span class="mr-2">Cogeneration (Bagasse)</span> <i class="fas fa-check-circle text-green-400"></i></li>
+                            <li class="flex items-center justify-end"><span class="mr-2">Zero-waste circularity</span> <i class="fas fa-check-circle text-green-400"></i></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slider -->
+                <div class="slider-handle" id="slider-handle"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                <div class="text-center">
+                    <div class="text-4xl font-black text-green-600 mb-2">80%</div>
+                    <div class="text-sm font-bold uppercase text-slate-500">Efficiency Gain</div>
+                    <p class="text-xs text-slate-400 mt-2">Modern boiler systems vs open-air burning techniques.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-black text-green-600 mb-2">12M</div>
+                    <div class="text-sm font-bold uppercase text-slate-500">Cars Offset</div>
+                    <p class="text-xs text-slate-400 mt-2">Annual CO2 reduction compared to gasoline use in Brazil.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-black text-green-600 mb-2">2nd Gen</div>
+                    <div class="text-sm font-bold uppercase text-slate-500">Cellulosic Tech</div>
+                    <p class="text-xs text-slate-400 mt-2">Turning leaves and straw into additional fuel volume.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div>
+                <h2 class="text-2xl font-bold flex items-center gap-2 mb-4">
+                    <i class="fas fa-leaf text-green-500"></i> BioJourney
+                </h2>
+                <p class="text-slate-400 leading-relaxed">
+                    Exploring the intersection of agriculture, technology, and climate action through the lens of Brazilian bioethanol production.
+                </p>
+            </div>
+            <div>
+                <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">The Energy Balance</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Sugarcane bioethanol offers an energy balance of up to 9.2, meaning for every 1 unit of fossil energy used in production, 9.2 units of renewable energy are delivered. This is significantly higher than corn ethanol (approx. 1.5) or cellulosic ethanol (approx. 4-5).
+                </p>
+            </div>
+            <div>
+                <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Key Metrics</h3>
+                <ul class="text-slate-400 text-sm space-y-2">
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> 80% GHG reduction avg.</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> No competition with food crops</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Efficient water recycling</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Bagasse-powered plants</li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-12 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+            &copy; 2024 Americas Biomass Visualization. All data simplified for educational purposes.
+        </div>
+    </footer>
+
+    <script>
+        const stepData = {
+            1: {
+                title: "Planting & Growing",
+                desc: "Sugarcane is planted in vast Brazilian fields. During its 12-18 month growth cycle, it absorbs massive amounts of CO2 from the atmosphere through photosynthesis, making the entire lifecycle nearly carbon neutral.",
+                energy: "1 : 9.2",
+                emissions: "-2.4t CO2",
+                img: "https://images.unsplash.com/photo-1596733430284-f7437764b1a9?auto=format&fit=crop&q=80&w=1200"
+            },
+            2: {
+                title: "Precision Harvesting",
+                desc: "Modern harvesting is almost entirely mechanical in Brazil, eliminating the old practice of field burning. Machines chop the cane and separate leaves (trash) which are left to fertilize the soil or sent for power generation.",
+                energy: "1 : 7.8",
+                emissions: "+0.4t CO2",
+                img: "https://images.unsplash.com/photo-1530569673472-307dc017a8c4?auto=format&fit=crop&q=80&w=1200"
+            },
+            3: {
+                title: "Milling & Extraction",
+                desc: "At the mill, cane is crushed to extract juice. The remaining woody fiber, called 'bagasse', is a critical byproduct. It is burned in high-pressure boilers to generate steam and electricity for the entire plant.",
+                energy: "1 : 12.5",
+                emissions: "+0.1t CO2",
+                img: "https://plus.unsplash.com/premium_photo-1664303487375-684992451f8f?auto=format&fit=crop&q=80&w=1200"
+            },
+            4: {
+                title: "Yeast Fermentation",
+                desc: "The sugar-rich juice is mixed with yeast in massive tanks. Yeast converts sugars into ethanol and CO2. The CO2 is often captured for industrial use (carbonation in beverages).",
+                energy: "1 : 5.4",
+                emissions: "+0.05t CO2",
+                img: "https://images.unsplash.com/photo-1571212515416-fef01fc43637?auto=format&fit=crop&q=80&w=1200"
+            },
+            5: {
+                title: "Multi-stage Distillation",
+                desc: "The fermented 'wine' is distilled to separate water from ethanol. Brazil uses advanced vacuum distillation to minimize heat requirements. The byproduct 'vinasse' is recycled back to fields as nutrient-rich liquid fertilizer.",
+                energy: "1 : 4.2",
+                emissions: "+0.2t CO2",
+                img: "https://images.unsplash.com/photo-1584281722572-8700288806a1?auto=format&fit=crop&q=80&w=1200"
+            },
+            6: {
+                title: "Sustainable End Use",
+                desc: "Bioethanol is transported to pumps across the Americas. Flex-fuel vehicles can run on 100% ethanol (E100). When burned, the engine releases the same CO2 the plant absorbed during growth, closing the carbon loop.",
+                energy: "1 : 8.5",
+                emissions: "Net Zero",
+                img: "https://images.unsplash.com/photo-1605152276897-4f618f831968?auto=format&fit=crop&q=80&w=1200"
+            }
+        };
+
+        function showStep(step) {
+            // Update buttons
+            document.querySelectorAll('.step-card').forEach(btn => {
+                btn.classList.remove('active-step');
+            });
+            document.getElementById(`btn-${step}`).classList.add('active-step');
+
+            // Update content with animation
+            const panel = document.getElementById('detail-panel');
+            const elements = panel.querySelectorAll('h3, p, img, span');
+            
+            elements.forEach(el => {
+                el.style.transition = 'all 0.4s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+            });
+            
+            setTimeout(() => {
+                const data = stepData[step];
+                document.getElementById('step-number').innerText = `Stage 0${step}`;
+                document.getElementById('step-title').innerText = data.title;
+                document.getElementById('step-desc').innerText = data.desc;
+                document.getElementById('step-energy').innerText = data.energy;
+                document.getElementById('step-emissions').innerText = data.emissions;
+                document.getElementById('step-image').src = data.img;
+                
+                elements.forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 300);
+        }
+
+        // Comparison Slider Logic
+        const sliderRoot = document.getElementById('slider-root');
+        const afterImg = document.getElementById('after-img');
+        const sliderHandle = document.getElementById('slider-handle');
+
+        let isResizing = false;
+
+        const setSliderPos = (x) => {
+            const rect = sliderRoot.getBoundingClientRect();
+            let pos = ((x - rect.left) / rect.width) * 100;
+            pos = Math.max(0, Math.min(100, pos));
+            
+            afterImg.style.width = `${100 - pos}%`;
+            afterImg.style.left = `${pos}%`;
+            afterImg.style.backgroundPosition = `-${(pos/100) * rect.width}px center`;
+            sliderHandle.style.left = `${pos}%`;
+        };
+
+        // Initialize background position for "after" image
+        const initSlider = () => {
+            const rect = sliderRoot.getBoundingClientRect();
+            afterImg.style.backgroundSize = `${rect.width}px ${rect.height}px`;
+            setSliderPos(rect.left + rect.width / 2);
+        };
+
+        window.addEventListener('load', initSlider);
+        window.addEventListener('resize', initSlider);
+
+        sliderRoot.addEventListener('mousedown', () => isResizing = true);
+        window.addEventListener('mouseup', () => isResizing = false);
+        window.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            setSliderPos(e.pageX);
+        });
+
+        // Touch support
+        sliderRoot.addEventListener('touchstart', () => isResizing = true);
+        window.addEventListener('touchend', () => isResizing = false);
+        window.addEventListener('touchmove', (e) => {
+            if (!isResizing) return;
+            setSliderPos(e.touches[0].pageX);
+        });
+
+    </script>
+</body>
+</html>
